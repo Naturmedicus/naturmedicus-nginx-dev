@@ -9,6 +9,16 @@ server {
 #                log_not_found off;
 #        }
 
+        location /docsdev {
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host $http_host;
+
+            proxy_pass http://127.0.0.1:8000/;
+            proxy_redirect off;
+            proxy_buffering off;
+        }
+
         location /v2/bundles/ {
             autoindex off;
             alias /var/www/html/naturmedicus/web/bundles/;
@@ -30,8 +40,12 @@ server {
         }
 
         location / {
-                # Check if a file or directory index file exists, else route it to index.php.
-                try_files $uri $uri/ /index.php;
+            # Check if a file or directory index file exists, else route it to index.php.
+            try_files $uri $uri/ /index.php;
+        }
+
+        location /v2/favicon.ico {
+            alias /var/www/html/naturmedicus/web/favicon.ico;
         }
 
         location /v2/ {
@@ -46,46 +60,46 @@ server {
         # This rule should only be placed on your development environment
         # In production, don't include this and don't deploy app_dev.php or config.php
         location ~ ^/(app_dev|config)\.php(/|$) {
-                fastcgi_pass php:9000;
-                fastcgi_split_path_info ^(.+\.php)(/.*)$;
-                include fastcgi_params;
-                # When you are using symlinks to link the document root to the
-                # current version of your application, you should pass the real
-                # application path instead of the path to the symlink to PHP
-                # FPM.
-                # Otherwise, PHP's OPcache may not properly detect changes to
-                # your PHP files (see https://github.com/zendtech/ZendOptimizerPlus/issues/126
-                # for more information).
-                fastcgi_param SCRIPT_FILENAME /var/www/html/naturmedicus/web/$fastcgi_script_name;
-                fastcgi_param SCRIPT_NAME /v2$fastcgi_script_name;
-                fastcgi_param DOCUMENT_ROOT /var/www/html/naturmedicus/web;
+            fastcgi_pass php:9000;
+            fastcgi_split_path_info ^(.+\.php)(/.*)$;
+            include fastcgi_params;
+            # When you are using symlinks to link the document root to the
+            # current version of your application, you should pass the real
+            # application path instead of the path to the symlink to PHP
+            # FPM.
+            # Otherwise, PHP's OPcache may not properly detect changes to
+            # your PHP files (see https://github.com/zendtech/ZendOptimizerPlus/issues/126
+            # for more information).
+            fastcgi_param SCRIPT_FILENAME /var/www/html/naturmedicus/web/$fastcgi_script_name;
+            fastcgi_param SCRIPT_NAME /v2$fastcgi_script_name;
+            fastcgi_param DOCUMENT_ROOT /var/www/html/naturmedicus/web;
         }
 
         # PROD
         location ~ ^/app\.php(/|$) {
-                fastcgi_pass php:9000;
-                fastcgi_split_path_info ^(.+\.php)(/.*)$;
-                include fastcgi_params;
-                # When you are using symlinks to link the document root to the
-                # current version of your application, you should pass the real
-                # application path instead of the path to the symlink to PHP
-                # FPM.
-                # Otherwise, PHP's OPcache may not properly detect changes to
-                # your PHP files (see https://github.com/zendtech/ZendOptimizerPlus/issues/126
-                # for more information).
-                fastcgi_param SCRIPT_FILENAME /var/www/html/naturmedicus/web/$fastcgi_script_name;
-                fastcgi_param SCRIPT_NAME /v2$fastcgi_script_name;
-                fastcgi_param DOCUMENT_ROOT /var/www/html/naturmedicus/web;
-                # Prevents URIs that include the front controller. This will 404:
-                # http://domain.tld/app.php/some-path
-                # Remove the internal directive to allow URIs like this
-                internal;
+            fastcgi_pass php:9000;
+            fastcgi_split_path_info ^(.+\.php)(/.*)$;
+            include fastcgi_params;
+            # When you are using symlinks to link the document root to the
+            # current version of your application, you should pass the real
+            # application path instead of the path to the symlink to PHP
+            # FPM.
+            # Otherwise, PHP's OPcache may not properly detect changes to
+            # your PHP files (see https://github.com/zendtech/ZendOptimizerPlus/issues/126
+            # for more information).
+            fastcgi_param SCRIPT_FILENAME /var/www/html/naturmedicus/web/$fastcgi_script_name;
+            fastcgi_param SCRIPT_NAME /v2$fastcgi_script_name;
+            fastcgi_param DOCUMENT_ROOT /var/www/html/naturmedicus/web;
+            # Prevents URIs that include the front controller. This will 404:
+            # http://domain.tld/app.php/some-path
+            # Remove the internal directive to allow URIs like this
+            internal;
         }
 
         location ~^/index\.php(/|$) {
-                fastcgi_pass php:9000;
-                include fastcgi.conf;
-                fastcgi_param SCRIPT_FILENAME /var/www/html/naturmedicus/legacy/$fastcgi_script_name;
-                fastcgi_param DOCUMENT_ROOT /var/www/html/naturmedicus/legacy;
+            fastcgi_pass php:9000;
+            include fastcgi.conf;
+            fastcgi_param SCRIPT_FILENAME /var/www/html/naturmedicus/legacy/$fastcgi_script_name;
+            fastcgi_param DOCUMENT_ROOT /var/www/html/naturmedicus/legacy;
         }
 }
